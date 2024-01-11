@@ -31,13 +31,13 @@ blueprint:
           min: -50.0
           max: 1250.0
           step: 1.0
-  source_url: https://gist.github.com/tvwerkhoven/e2b30274d2bb054d60bca2c7cd45ebdf
-alias: High sensor value notification+
-description: Notify when high sensor values are detected somewhere
+  source_url: https://raw.githubusercontent.com/suntitpro/smarthome/main/notify-low-sensor-value.yaml
+alias: Low sensor value notification+
+description: Notify when low sensor values are detected somewhere
 trigger:
   - platform: numeric_state
     entity_id: !input trigger_sensor
-    above: !input trigger_level_high
+    below: !input trigger_level_low
 variables:
   trigger_sensor_var: !input trigger_sensor
   trigger_level_high_var: !input trigger_level_high
@@ -48,17 +48,17 @@ action:
       until:
         - condition: numeric_state
           entity_id: !input trigger_sensor
-          below: !input trigger_level_low
+          above: !input trigger_level_high
       sequence:
         - service: notify.notify
           data:
             message:
-              High reading of {{state_attr(trigger_sensor_var, 'friendly_name')}}  at
+              Low reading of {{state_attr(trigger_sensor_var, 'friendly_name')}}  at
               {{ states(trigger_sensor_var) }}{{state_attr(trigger_sensor_var, 'unit_of_measurement')  }}
         - wait_for_trigger:
             - platform: numeric_state
               entity_id: !input trigger_sensor
-              below: !input trigger_level_low
+              above: !input trigger_level_high
           timeout:
             minutes: 60
           continue_on_timeout: false
